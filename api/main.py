@@ -3,8 +3,8 @@ import sys
 import json
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-PARENT_DIR = os.path.dirname(CURRENT_DIR)
-for p in [CURRENT_DIR, PARENT_DIR, os.getcwd()]:
+API_DIR = os.path.join(CURRENT_DIR, "api")
+for p in [CURRENT_DIR, API_DIR, os.getcwd()]:
     if p and p not in sys.path:
         sys.path.insert(0, p)
 
@@ -30,6 +30,8 @@ from src.causal_engine import MultiMetricCausalEngine
 from src.geo_engine import GeoSpatialResolver
 from src.conversation_engine import ConversationIntelligenceEngine
 from src.embedded_data import EMBEDDED_SCENARIOS
+from src.embedded_static import INDEX_HTML, STYLE_CSS, APP_JS
+
 
 app = FastAPI(
     title="Darukaa.Earth - AI Biodiversity Intelligence API",
@@ -154,9 +156,19 @@ def read_static_file(filename: str) -> str:
     ]
     for c in candidates:
         if os.path.exists(c):
-            with open(c, "r", encoding="utf-8") as f:
-                return f.read()
+            try:
+                with open(c, "r", encoding="utf-8") as f:
+                    return f.read()
+            except Exception:
+                pass
+    if filename == "index.html":
+        return INDEX_HTML
+    elif filename == "style.css":
+        return STYLE_CSS
+    elif filename == "app.js":
+        return APP_JS
     return ""
+
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_index():
