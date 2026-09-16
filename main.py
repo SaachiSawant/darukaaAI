@@ -95,13 +95,15 @@ async def analyze_endpoint(context: StructuredContext):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+from src.embedded_data import EMBEDDED_SCENARIOS
+
 @app.get("/api/scenarios")
 async def get_scenarios():
     scenarios_path = os.path.join(DATA_DIR, "scenarios.json")
     if os.path.exists(scenarios_path):
         with open(scenarios_path, "r", encoding="utf-8") as f:
             return json.load(f)
-    return []
+    return EMBEDDED_SCENARIOS
 
 @app.get("/api/knowledge/search")
 async def search_knowledge(

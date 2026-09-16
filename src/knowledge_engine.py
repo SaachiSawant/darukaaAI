@@ -5,6 +5,8 @@ import math
 from typing import List, Dict, Any, Optional
 from src.models import ScientificCitation
 
+from src.embedded_data import EMBEDDED_KNOWLEDGE_CORPUS
+
 class HybridKnowledgeEngine:
     """
     Hybrid RAG Knowledge Retrieval Engine.
@@ -14,7 +16,6 @@ class HybridKnowledgeEngine:
     """
     def __init__(self, corpus_path: Optional[str] = None):
         if corpus_path is None:
-            # Multi-path discovery for serverless compatibility
             candidates = [
                 os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "knowledge_corpus.json"),
                 os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "knowledge_corpus.json"),
@@ -26,8 +27,6 @@ class HybridKnowledgeEngine:
                 if os.path.exists(c):
                     corpus_path = c
                     break
-            if corpus_path is None:
-                corpus_path = candidates[0]
 
         self.corpus_path = corpus_path
         self.documents: List[Dict[str, Any]] = []
@@ -45,12 +44,11 @@ class HybridKnowledgeEngine:
         return tokens
 
     def _load_and_index_corpus(self):
-        if not os.path.exists(self.corpus_path):
-            self.documents = []
-            return
-
-        with open(self.corpus_path, "r", encoding="utf-8") as f:
-            self.documents = json.load(f)
+        if self.corpus_path and os.path.exists(self.corpus_path):
+            with open(self.corpus_path, "r", encoding="utf-8") as f:
+                self.documents = json.load(f)
+        else:
+            self.documents = EMBEDDED_KNOWLEDGE_CORPUS.copy()
 
         N = len(self.documents)
         doc_freqs: Dict[str, int] = {}
