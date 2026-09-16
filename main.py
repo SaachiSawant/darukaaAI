@@ -11,7 +11,7 @@ for p in [CURRENT_DIR, PARENT_DIR, os.getcwd()]:
 
 from typing import Optional, List, Dict, Any
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Query, Response
+from fastapi import FastAPI, HTTPException, Query, Response, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse, PlainTextResponse
 from pydantic import BaseModel
@@ -72,8 +72,19 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Vercel Serverless Path Normalization Middleware
+@app.middleware("http")
+async def vercel_path_normalizer(request: Request, call_next):
+    raw_path = request.scope.get("path", "")
+    for prefix in ["/api/index.py", "/api/index", "/api/main.py", "/api/main"]:
+        if raw_path.startswith(prefix):
+            raw_path = raw_path[len(prefix):] or "/"
+            request.scope["path"] = raw_path
+            break
+    return await call_next(request)
+
 if INIT_ERROR:
-    @app.api_route("/{full_path:path}", methods=["GET", "POST"])
+    @app.api_route("/{full_path:path}", methods=["GET", "POST", "PUT", "DELETE"])
     async def init_error_handler(full_path: str):
         return PlainTextResponse(f"Darukaa Initialization Diagnostics:\n{INIT_ERROR}", status_code=500)
 else:
@@ -87,7 +98,8 @@ else:
             "domains_indexed": kb_engine.get_all_domains()
         }
 
-    @app.post("/api/chat", response_model=EcologicalAnalysisResult)
+    @app.post("/api/chat")
+    @app.post("/chat")
     async def chat_endpoint(req: ChatRequest):
         try:
             result = conv_engine.process_chat(req)
@@ -95,7 +107,8 @@ else:
         except Exception as e:
             raise HTTPException(status_code=500, detail=str(e))
 
-    @app.post("/api/analyze", response_model=EcologicalAnalysisResult)
+    @app.post("/api/analyze")
+    @app.post("/analyze")
     async def analyze_endpoint(context: StructuredContext):
         try:
             req = ChatRequest(
@@ -109,10 +122,12 @@ else:
             raise HTTPException(status_code=500, detail=str(e))
 
     @app.get("/api/scenarios")
+    @app.get("/scenarios")
     async def get_scenarios():
         return EMBEDDED_SCENARIOS
 
     @app.get("/api/knowledge/search")
+    @app.get("/knowledge/search")
     async def search_knowledge(
         q: str = Query(..., description="Search query for scientific literature"),
         top_k: int = Query(4, ge=1, le=10),
@@ -126,6 +141,7 @@ else:
         }
 
     @app.get("/api/knowledge/all")
+    @app.get("/knowledge/all")
     async def get_all_knowledge():
         return {
             "total_documents": len(kb_engine.documents),
@@ -138,6 +154,7 @@ else:
         region_text: Optional[str] = None
 
     @app.post("/api/geo/lookup")
+    @app.post("/geo/lookup")
     async def geo_lookup(req: GeoLookupRequest):
         if req.lat is not None and req.lon is not None:
             return geo_resolver.resolve_coordinates(req.lat, req.lon)
@@ -152,14 +169,17 @@ else:
     @app.get("/index", response_class=HTMLResponse)
     @app.get("/api", response_class=HTMLResponse)
     @app.get("/api/index", response_class=HTMLResponse)
+    @app.get("/api/index.py", response_class=HTMLResponse)
     async def serve_index():
         return HTMLResponse(content=INDEX_HTML)
 
     @app.get("/static/style.css")
+    @app.get("/style.css")
     async def serve_css():
         return Response(content=STYLE_CSS, media_type="text/css")
 
     @app.get("/static/app.js")
+    @app.get("/app.js")
     async def serve_js():
         return Response(content=APP_JS, media_type="application/javascript")
 
