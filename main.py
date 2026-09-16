@@ -183,6 +183,18 @@ else:
     async def serve_js():
         return Response(content=APP_JS, media_type="application/javascript")
 
+    @app.api_route("/{rest_of_path:path}", methods=["GET", "POST", "PUT", "DELETE"])
+    async def catch_all_debug(request: Request, rest_of_path: str):
+        return JSONResponse({
+            "debug": "catch_all_triggered",
+            "rest_of_path": rest_of_path,
+            "url": str(request.url),
+            "path": request.scope.get("path"),
+            "raw_path": str(request.scope.get("raw_path")),
+            "root_path": request.scope.get("root_path")
+        })
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+
