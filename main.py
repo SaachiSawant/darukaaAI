@@ -1,5 +1,6 @@
 import os
 import json
+from typing import Optional, List, Dict, Any
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
@@ -123,9 +124,9 @@ async def get_all_knowledge():
     }
 
 class GeoLookupRequest(BaseModel):
-    lat: float = None
-    lon: float = None
-    region_text: str = None
+    lat: Optional[float] = None
+    lon: Optional[float] = None
+    region_text: Optional[str] = None
 
 @app.post("/api/geo/lookup")
 async def geo_lookup(req: GeoLookupRequest):
