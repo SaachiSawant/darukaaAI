@@ -8,9 +8,6 @@ for p in [PARENT_DIR, CURRENT_DIR, os.getcwd()]:
     if p and p not in sys.path:
         sys.path.insert(0, p)
 
+# Vercel natively executes ASGI FastAPI applications exported as `app`
 from main import app
-from mangum import Mangum
 
-# Mangum bridges ASGI (FastAPI) to Vercel/Lambda serverless execution
-handler = Mangum(app, lifespan="off")
-app = handler
