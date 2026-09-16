@@ -2,10 +2,9 @@ import os
 import json
 from typing import Optional, List, Dict, Any
 from dotenv import load_dotenv
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from pydantic import BaseModel
 
 # Load environment variables from .env if present
@@ -21,6 +20,7 @@ from src.knowledge_engine import HybridKnowledgeEngine
 from src.causal_engine import MultiMetricCausalEngine
 from src.geo_engine import GeoSpatialResolver
 from src.conversation_engine import ConversationIntelligenceEngine
+from src.embedded_data import EMBEDDED_SCENARIOS
 
 app = FastAPI(
     title="Darukaa.Earth - AI Biodiversity Intelligence API",
@@ -40,14 +40,16 @@ app.add_middleware(
 # Multi-path discovery for serverless / Vercel
 def find_dir(dir_name: str) -> str:
     candidates = [
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "api", dir_name),
         os.path.join(os.path.dirname(os.path.abspath(__file__)), dir_name),
+        os.path.join(os.getcwd(), "api", dir_name),
         os.path.join(os.getcwd(), dir_name),
         os.path.join(os.path.dirname(os.getcwd()), dir_name)
     ]
     for c in candidates:
         if os.path.exists(c):
             return c
-    return candidates[0]
+    return candidates[1]
 
 STATIC_DIR = find_dir("static")
 DATA_DIR = find_dir("data")
@@ -57,13 +59,6 @@ kb_engine = HybridKnowledgeEngine()
 causal_engine = MultiMetricCausalEngine(kb_engine)
 geo_resolver = GeoSpatialResolver()
 conv_engine = ConversationIntelligenceEngine(kb_engine, causal_engine, geo_resolver)
-
-# Mount static files
-if os.path.exists(STATIC_DIR):
-    try:
-        app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
-    except Exception:
-        pass
 
 @app.get("/api/health")
 async def health_check():
@@ -94,8 +89,6 @@ async def analyze_endpoint(context: StructuredContext):
         return result
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-from src.embedded_data import EMBEDDED_SCENARIOS
 
 @app.get("/api/scenarios")
 async def get_scenarios():
@@ -141,13 +134,37 @@ async def geo_lookup(req: GeoLookupRequest):
         return {"error": "Region not recognized. Using default global temperate baseline."}
     raise HTTPException(status_code=400, detail="Must provide lat/lon or region_text")
 
+# Direct Static Routes (Zero-dependency on aiofiles/Starlette StaticFiles)
+def read_static_file(filename: str) -> str:
+    candidates = [
+        os.path.join(STATIC_DIR, filename),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", filename),
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "api", "static", filename),
+        os.path.join(os.getcwd(), "static", filename),
+        os.path.join(os.getcwd(), "api", "static", filename)
+    ]
+    for c in candidates:
+        if os.path.exists(c):
+            with open(c, "r", encoding="utf-8") as f:
+                return f.read()
+    return ""
+
 @app.get("/", response_class=HTMLResponse)
 async def serve_index():
-    index_file = os.path.join(STATIC_DIR, "index.html")
-    if os.path.exists(index_file):
-        with open(index_file, "r", encoding="utf-8") as f:
-            return HTMLResponse(content=f.read())
+    content = read_static_file("index.html")
+    if content:
+        return HTMLResponse(content=content)
     return HTMLResponse(content="<h1>Darukaa.Earth AI Biodiversity Intelligence API is running.</h1>")
+
+@app.get("/static/style.css")
+async def serve_css():
+    content = read_static_file("style.css")
+    return Response(content=content, media_type="text/css")
+
+@app.get("/static/app.js")
+async def serve_js():
+    content = read_static_file("app.js")
+    return Response(content=content, media_type="application/javascript")
 
 if __name__ == "__main__":
     import uvicorn

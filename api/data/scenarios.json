@@ -1,0 +1,62 @@
+[
+  {
+    "id": "semi-arid-wheat-monoculture",
+    "name": "Semi-Arid Monoculture Wheat Degradation",
+    "region": "Semi-Arid Dryland (e.g., Central India / Australian Wheatbelt / US High Plains)",
+    "coordinates": {"lat": 23.2599, "lon": 77.4126},
+    "soil_organic_carbon": 0.3,
+    "soil_ph": 7.8,
+    "rainfall_category": "low",
+    "annual_rainfall_mm": 380,
+    "land_use": "monoculture_wheat",
+    "tillage": "conventional_deep_plow",
+    "human_impact": "high synthetic NPK, zero residue retention, high wind erosion",
+    "current_biodiversity_state": "Low soil microbial biomass (POXC <120 mg/kg), zero pollinator habitat, severe wind erosion, hardpan at 15cm",
+    "user_query": "I run a 50-hectare monoculture wheat farm in a semi-arid zone with low rainfall (~380mm). My soil organic carbon has dropped to 0.3%, the ground crusts after every rain, and yield is failing under dry spells. What scientific interventions should I take to restore biodiversity and soil health without depleting what little water I have?"
+  },
+  {
+    "id": "degraded-tropical-pasture",
+    "name": "Degraded Acidic Tropical Pasture (Silvopasture Opportunity)",
+    "region": "Humid Subtropical / Tropical Savanna (e.g., Cerrado / Deccan Plateau)",
+    "coordinates": {"lat": -15.7975, "lon": -47.8919},
+    "soil_organic_carbon": 0.8,
+    "soil_ph": 4.9,
+    "rainfall_category": "medium_seasonal",
+    "annual_rainfall_mm": 1150,
+    "land_use": "continuous_grazing_pasture",
+    "tillage": "none_compacted",
+    "human_impact": "overgrazing, severe compaction, aluminum toxicity, bush clearing",
+    "current_biodiversity_state": "High invasive weed encroachment (Brachiaria monoculture collapse), termite dominance, absence of native pollinators and deep rooting legumes",
+    "user_query": "My pastureland has become heavily compacted from cattle overgrazing, the soil pH is acidic at 4.9 with aluminum toxicity, and SOC is 0.8%. Rainfall is 1150mm during the monsoon but soils bake rock-hard in dry months. How can I transition to silvopastoral agroforestry and restore fungal and invertebrate diversity?"
+  },
+  {
+    "id": "riparian-agricultural-runoff",
+    "name": "Intensive Grain Farm with Riparian Runoff & Nitrate Leaching",
+    "region": "Temperate Alluvial Plain (e.g., Indo-Gangetic Basin / US Midwest)",
+    "coordinates": {"lat": 28.6139, "lon": 77.2090},
+    "soil_organic_carbon": 1.1,
+    "soil_ph": 6.8,
+    "rainfall_category": "moderate_high",
+    "annual_rainfall_mm": 850,
+    "land_use": "intensive_rice_wheat_rotation",
+    "tillage": "rotary_tillage",
+    "human_impact": "heavy urea and synthetic pesticide runoff into adjacent stream network",
+    "current_biodiversity_state": "Aquatic macroinvertebrate collapse in adjacent watercourses, eutrophication blooms, low soil mycorrhizal colonization due to excess soluble P",
+    "user_query": "We practice high-input rice-wheat rotation next to a perennial river basin. Nitrate leaching into local aquifers is severe, and stream life is collapsing. We need a landscape-level intervention combining vegetative buffers and biological nutrient cycling."
+  },
+  {
+    "id": "salinized-alkaline-cotton",
+    "name": "Secondary Salinized Cotton / Arid Irrigated Land",
+    "region": "Arid Irrigated Basin (e.g., Gujarat / Indus Basin / San Joaquin Valley)",
+    "coordinates": {"lat": 22.3072, "lon": 70.8022},
+    "soil_organic_carbon": 0.4,
+    "soil_ph": 8.7,
+    "rainfall_category": "arid_irrigated",
+    "annual_rainfall_mm": 280,
+    "land_use": "irrigated_cotton_monoculture",
+    "tillage": "tillage_furrow",
+    "human_impact": "groundwater over-pumping, secondary salinization, sodicity, surface crusting",
+    "current_biodiversity_state": "High electrical conductivity (EC > 4.8 dS/m), severe mycorrhizal dormancy, zero earthworm presence, sodic crusting preventing emergence",
+    "user_query": "Our irrigated cotton farm has high soil salinity and alkaline pH of 8.7 with only 0.4% SOC. Earthworms and soil life are completely absent. How do we remediate soil sodicity, lower EC, and kickstart biological soil succession?"
+  }
+]

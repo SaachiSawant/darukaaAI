@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Darukaa.Earth — AI Biodiversity Intelligence & Ecological Reasoning System</title>
+  <meta name="description" content="State-of-the-art AI environmental scientist connecting soil health, climate, and land-use for evidence-backed biodiversity restoration.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Header Bar -->
+  <header class="app-header">
+    <div class="brand-group">
+      <div class="logo-orb">
+        <span class="orb-core"></span>
+      </div>
+      <div>
+        <h1 class="brand-title">DARUKAA<span>.EARTH</span></h1>
+        <p class="brand-subtitle">AI Biodiversity Intelligence & Ecological Reasoning Engine</p>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <div class="badge badge-success">
+        <span class="status-dot"></span> 16+ Curated Meta-Analyses Indexed
+      </div>
+      <div class="badge badge-accent">
+        <span class="icon">🌐</span> Multi-Metric Causal AI
+      </div>
+      <button id="searchKnowledgeBtn" class="btn btn-secondary">
+        <span class="icon">🔍</span> Search Literature
+      </button>
+      <button id="resetSessionBtn" class="btn btn-outline" title="Start new session">
+        <span class="icon">🔄</span> New Session
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-layout">
+    <!-- Left Column: Conversational AI & Parameter Workbench -->
+    <section class="left-panel">
+      <!-- Benchmark Scenario Bar -->
+      <div class="scenario-bar">
+        <span class="scenario-label">Benchmark Scenarios:</span>
+        <div class="scenario-chips" id="scenarioChips">
+          <!-- Populated dynamically -->
+          <button class="chip" data-scenario="semi-arid-wheat-monoculture">🌾 Semi-Arid Wheat (0.3% SOC)</button>
+          <button class="chip" data-scenario="degraded-tropical-pasture">🐄 Tropical Pasture (pH 4.9)</button>
+          <button class="chip" data-scenario="riparian-agricultural-runoff">🌊 Riparian Farm Runoff</button>
+          <button class="chip" data-scenario="salinized-alkaline-cotton">🏜️ Salinized Cotton (pH 8.7)</button>
+        </div>
+      </div>
+
+      <!-- Chat Stream Window -->
+      <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+          <div class="message system-msg">
+            <div class="msg-avatar">🌱</div>
+            <div class="msg-body">
+              <strong>Darukaa.Earth Environmental Scientist initialized.</strong>
+              <p>I analyze ecosystems across multiple biophysical variables: <strong>Soil health (pH, SOC, mycorrhizae)</strong>, <strong>Climate & Hydrology (rainfall, drought vulnerability)</strong>, and <strong>Land Use (monoculture, tillage, agroforestry)</strong> to generate evidence-backed, quantifiable biodiversity restoration plans grounded in FAO, IPCC, and IPBES literature.</p>
+              <p class="hint-text">💡 <em>Try asking: "Biodiversity is declining on my land" or pick a benchmark scenario above.</em></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clarification Box (Dynamic) -->
+        <div id="clarificationBox" class="clarification-panel hidden">
+          <div class="clarification-header">
+            <span class="icon">⚠️</span>
+            <strong>Scientific Calibration Needed (Missing Variables Detected)</strong>
+          </div>
+          <div id="clarificationContent" class="clarification-content">
+            <!-- Dynamic questions -->
+          </div>
+        </div>
+
+        <!-- Input Box -->
+        <div class="chat-input-area">
+          <form id="chatForm" class="chat-form">
+            <textarea id="userInput" placeholder="Describe your land, soil conditions, climate, or biodiversity challenge..." rows="2" required></textarea>
+            <button type="submit" id="sendBtn" class="btn btn-primary">
+              <span>Reason</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Structured Parameter Workbench (Collapsible) -->
+      <details class="params-accordion" open>
+        <summary class="params-summary">
+          <span>🛠️ Structured Parameter Workbench (Optional Fine-Tuning)</span>
+          <span class="accordion-arrow">▼</span>
+        </summary>
+        <div class="params-grid">
+          <div class="param-control">
+            <label for="socInput">Soil Organic Carbon (SOC %): <span id="socVal">0.3%</span></label>
+            <input type="range" id="socInput" min="0.1" max="5.0" step="0.1" value="0.3">
+          </div>
+          <div class="param-control">
+            <label for="phInput">Soil pH: <span id="phVal">7.8</span></label>
+            <input type="range" id="phInput" min="4.0" max="9.5" step="0.1" value="7.8">
+          </div>
+          <div class="param-control">
+            <label for="rainInput">Annual Rainfall (mm): <span id="rainVal">380 mm</span></label>
+            <input type="range" id="rainInput" min="150" max="2500" step="25" value="380">
+          </div>
+          <div class="param-control">
+            <label for="landUseSelect">Land Use Type:</label>
+            <select id="landUseSelect" class="form-select">
+              <option value="monoculture_wheat">Monoculture Wheat / Grain</option>
+              <option value="continuous_grazing_pasture">Compacted Pasture / Grazing</option>
+              <option value="intensive_rice_wheat_rotation">Intensive Rice-Wheat / Alluvial</option>
+              <option value="irrigated_cotton_monoculture">Irrigated Cotton / Row Crop</option>
+              <option value="degraded_fallow">Degraded Fallow / Orchard</option>
+            </select>
+          </div>
+          <div class="param-control">
+            <label for="geoInput">Geo-Coordinates (Lat, Lon):</label>
+            <div class="geo-inputs">
+              <input type="number" id="latInput" placeholder="Lat (e.g. 23.26)" step="0.0001">
+              <input type="number" id="lonInput" placeholder="Lon (e.g. 77.41)" step="0.0001">
+              <button type="button" id="geoLookupBtn" class="btn btn-sm btn-outline">Resolve</button>
+            </div>
+            <div id="geoResolvedBadge" class="geo-badge hidden"></div>
+          </div>
+          <div class="param-control full-width">
+            <button type="button" id="applyParamsBtn" class="btn btn-accent btn-block">
+              ⚡ Execute Structured Causal Analysis
+            </button>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- Right Column: Deep Scientific Reasoning & Visual Analytics -->
+    <section class="right-panel">
+      <!-- Tabs for Scientific Views -->
+      <div class="view-tabs">
+        <button class="tab-btn active" data-tab="tab-overview">📊 Multi-Metric Intelligence</button>
+        <button class="tab-btn" data-tab="tab-causal">🧬 Causal Reasoning Graph</button>
+        <button class="tab-btn" data-tab="tab-interventions">🛠️ Evidence-Backed Interventions</button>
+        <button class="tab-btn" data-tab="tab-projections">📈 Quantified Projections</button>
+        <button class="tab-btn" data-tab="tab-citations">📚 Evidence Citations</button>
+      </div>
+
+      <!-- Tab Content Area -->
+      <div class="tab-content" id="tabContent">
+        <!-- Overview Tab -->
+        <div id="tab-overview" class="tab-pane active">
+          <!-- Executive Diagnosis Card -->
+          <div class="card diagnosis-card">
+            <div class="card-header">
+              <span class="icon">🔬</span>
+              <h3>Ecological Diagnosis & Systemic Bottlenecks</h3>
+              <span id="confidenceTag" class="badge badge-accent">94.2% Confidence</span>
+            </div>
+            <p id="diagnosisText" class="diagnosis-lead">
+              Awaiting ecosystem input parameters. Provide text query on the left or select a benchmark scenario to run multi-variable causal diagnosis.
+            </p>
+            <div id="geoDetailsBox" class="geo-details-box hidden"></div>
+          </div>
+
+          <!-- Multi-Variable Interaction Highlights -->
+          <div class="card">
+            <div class="card-header">
+              <span class="icon">🔄</span>
+              <h3>Multi-Variable Biophysical Coupling (Soil ↔ Climate ↔ Biodiversity)</h3>
+            </div>
+            <ul id="interactionList" class="interaction-list">
+              <li><em>Submit a query to inspect interconnected multi-variable relationships.</em></li>
+            </ul>
+          </div>
+
+          <!-- Quick Metrics Preview Grid -->
+          <div class="metrics-preview-grid" id="metricsPreviewGrid">
+            <!-- Populated dynamically -->
+          </div>
+        </div>
+
+        <!-- Causal Graph Tab -->
+        <div id="tab-causal" class="tab-pane">
+          <div class="card">
+            <div class="card-header">
+              <span class="icon">🧬</span>
+              <h3>Mechanistic Causal Chain Flow (Inputs → Mechanisms → Biodiversity Impact)</h3>
+            </div>
+            <p class="text-muted">Demonstrating non-obvious biophysical connections between 3+ simultaneous environmental variables:</p>
+            <div id="causalChainContainer" class="causal-chain-flow">
+              <!-- Rendered causal nodes -->
+              <div class="empty-state">Run an analysis to generate causal chain graph.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interventions Tab -->
+        <div id="tab-interventions" class="tab-pane">
+          <div class="card">
+            <div class="card-header">
+              <span class="icon">🛠️</span>
+              <h3>Actionable Scientific Interventions</h3>
+            </div>
+            <div id="interventionsContainer" class="interventions-list">
+              <!-- Rendered intervention cards -->
+              <div class="empty-state">No active interventions yet.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Projections Tab -->
+        <div id="tab-projections" class="tab-pane">
+          <div class="card">
+            <div class="card-header">
+              <span class="icon">📈</span>
+              <h3>Quantified Multi-Horizon Improvement Projections</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="data-table" id="projectionsTable">
+                <thead>
+                  <tr>
+                    <th>Metric Indicator</th>
+                    <th>Category</th>
+                    <th>Baseline</th>
+                    <th>Short-Term (0-1 yr)</th>
+                    <th>Medium-Term (2-4 yrs)</th>
+                    <th>Long-Term (5-10 yrs)</th>
+                    <th>Scientific Basis</th>
+                  </tr>
+                </thead>
+                <tbody id="projectionsTbody">
+                  <tr><td colspan="7" class="empty-cell">Execute analysis to see quantitative projections.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Citations Tab -->
+        <div id="tab-citations" class="tab-pane">
+          <div class="card">
+            <div class="card-header">
+              <span class="icon">📚</span>
+              <h3>Peer-Reviewed Scientific Literature & Institutional Evidence Base</h3>
+            </div>
+            <div id="citationsContainer" class="citations-list">
+              <!-- Rendered citation cards -->
+              <div class="empty-state">No citations loaded.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Literature Search Modal -->
+  <div id="knowledgeModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>🔍 Scientific Literature Knowledge Base Search</h3>
+        <button id="closeModalBtn" class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="search-box">
+          <input type="text" id="modalSearchInput" placeholder="Search by keyword, author, mechanism (e.g. biochar, mycorrhizae, semi-arid, FAO, IPCC)...">
+          <button id="modalSearchBtn" class="btn btn-primary">Search</button>
+        </div>
+        <div id="modalSearchResults" class="modal-results">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
