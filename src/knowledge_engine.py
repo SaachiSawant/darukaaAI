@@ -1,37 +1,61 @@
 import json
 import os
 import re
-import numpy as np
+import math
 from typing import List, Dict, Any, Optional
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 from src.models import ScientificCitation
 
 class HybridKnowledgeEngine:
     """
     Hybrid RAG Knowledge Retrieval Engine.
-    Combines dense TF-IDF n-gram vectorization with keyword semantic matching and
+    Combines n-gram TF-IDF vectorization with keyword semantic matching and
     structured domain filtering across peer-reviewed ecological literature.
+    Resilient across both local environments and Serverless (Vercel) runtimes.
     """
     def __init__(self, corpus_path: Optional[str] = None):
         if corpus_path is None:
-            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-            corpus_path = os.path.join(base_dir, "data", "knowledge_corpus.json")
+            # Multi-path discovery for serverless compatibility
+            candidates = [
+                os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "knowledge_corpus.json"),
+                os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "knowledge_corpus.json"),
+                os.path.join(os.getcwd(), "data", "knowledge_corpus.json"),
+                os.path.join(os.getcwd(), "api", "data", "knowledge_corpus.json"),
+                os.path.join(os.path.dirname(os.getcwd()), "data", "knowledge_corpus.json")
+            ]
+            for c in candidates:
+                if os.path.exists(c):
+                    corpus_path = c
+                    break
+            if corpus_path is None:
+                corpus_path = candidates[0]
+
         self.corpus_path = corpus_path
         self.documents: List[Dict[str, Any]] = []
-        self.vectorizer: Optional[TfidfVectorizer] = None
-        self.tfidf_matrix = None
+        self.doc_vectors: List[Dict[str, float]] = []
+        self.idf: Dict[str, float] = {}
         self._load_and_index_corpus()
+
+    def _tokenize(self, text: str) -> List[str]:
+        words = re.findall(r'\b[a-zA-Z0-9_\-\.]{2,}\b', text.lower())
+        tokens = []
+        for i in range(len(words)):
+            tokens.append(words[i])
+            if i < len(words) - 1:
+                tokens.append(f"{words[i]}_{words[i+1]}")
+        return tokens
 
     def _load_and_index_corpus(self):
         if not os.path.exists(self.corpus_path):
-            raise FileNotFoundError(f"Knowledge corpus not found at: {self.corpus_path}")
+            self.documents = []
+            return
 
         with open(self.corpus_path, "r", encoding="utf-8") as f:
             self.documents = json.load(f)
 
-        # Build combined text representations for indexing
-        corpus_texts = []
+        N = len(self.documents)
+        doc_freqs: Dict[str, int] = {}
+        doc_token_counts: List[Dict[str, int]] = []
+
         for doc in self.documents:
             keywords_str = " ".join(doc.get("keywords", []))
             metrics_str = " ".join([f"{k}: {v}" for k, v in doc.get("metrics_impacted", {}).items()])
@@ -40,54 +64,80 @@ class HybridKnowledgeEngine:
                 f"{keywords_str} {doc.get('summary', '')} {doc.get('ecological_mechanisms', '')} "
                 f"{doc.get('applicability', '')} {metrics_str}"
             )
-            corpus_texts.append(full_text)
+            tokens = self._tokenize(full_text)
+            counts: Dict[str, int] = {}
+            for t in tokens:
+                counts[t] = counts.get(t, 0) + 1
+            doc_token_counts.append(counts)
 
-        # Vectorize using word and char n-grams for robust matching
-        self.vectorizer = TfidfVectorizer(
-            ngram_range=(1, 3),
-            max_features=5000,
-            sublinear_tf=True
-        )
-        self.tfidf_matrix = self.vectorizer.fit_transform(corpus_texts)
+            for t in counts.keys():
+                doc_freqs[t] = doc_freqs.get(t, 0) + 1
+
+        # Calculate IDF
+        self.idf = {}
+        for t, df in doc_freqs.items():
+            self.idf[t] = math.log((N + 1) / (df + 1)) + 1.0
+
+        # Calculate TF-IDF vectors
+        self.doc_vectors = []
+        for counts in doc_token_counts:
+            vec: Dict[str, float] = {}
+            norm_sq = 0.0
+            for t, count in counts.items():
+                tfidf = (1.0 + math.log(count)) * self.idf.get(t, 1.0)
+                vec[t] = tfidf
+                norm_sq += tfidf * tfidf
+            norm = math.sqrt(norm_sq) if norm_sq > 0 else 1.0
+            for t in vec:
+                vec[t] /= norm
+            self.doc_vectors.append(vec)
 
     def retrieve(
         self,
         query: str,
         top_k: int = 4,
         domain_filter: Optional[str] = None,
-        min_relevance: float = 0.08
+        min_relevance: float = 0.05
     ) -> List[ScientificCitation]:
-        """
-        Retrieves top relevant scientific citations for a query using hybrid scoring.
-        """
-        if not query.strip() or self.vectorizer is None:
+        if not query.strip() or not self.documents:
             return []
 
-        # TF-IDF query representation
-        query_vec = self.vectorizer.transform([query])
-        sim_scores = cosine_similarity(query_vec, self.tfidf_matrix).flatten()
+        q_tokens = self._tokenize(query)
+        q_counts: Dict[str, int] = {}
+        for t in q_tokens:
+            q_counts[t] = q_counts.get(t, 0) + 1
 
-        # Keyword booster
+        # Vectorize query
+        q_vec: Dict[str, float] = {}
+        norm_sq = 0.0
+        for t, count in q_counts.items():
+            if t in self.idf:
+                tfidf = (1.0 + math.log(count)) * self.idf[t]
+                q_vec[t] = tfidf
+                norm_sq += tfidf * tfidf
+        norm = math.sqrt(norm_sq) if norm_sq > 0 else 1.0
+        for t in q_vec:
+            q_vec[t] /= norm
+
         query_words = set(re.findall(r'\w+', query.lower()))
         boosted_scores = []
 
         for idx, doc in enumerate(self.documents):
-            base_score = float(sim_scores[idx])
-            
             # Domain filter check
             if domain_filter and doc.get("domain") != domain_filter:
                 boosted_scores.append((0.0, idx))
                 continue
 
-            # Check keyword overlaps
+            # Dot product cosine similarity
+            d_vec = self.doc_vectors[idx] if idx < len(self.doc_vectors) else {}
+            cos_sim = sum(q_vec.get(t, 0.0) * d_vec.get(t, 0.0) for t in q_vec)
+
+            # Keyword overlap boost
             doc_keywords = set([k.lower() for k in doc.get("keywords", [])])
             overlap = len(query_words.intersection(doc_keywords))
-            keyword_boost = overlap * 0.05
-
-            final_score = base_score + keyword_boost
+            final_score = cos_sim + (overlap * 0.05)
             boosted_scores.append((final_score, idx))
 
-        # Sort descending by score
         boosted_scores.sort(key=lambda x: x[0], reverse=True)
 
         results: List[ScientificCitation] = []
@@ -95,8 +145,6 @@ class HybridKnowledgeEngine:
             if score < min_relevance and len(results) >= 2:
                 continue
             doc = self.documents[idx]
-            
-            # Formulate concise relevant finding
             finding = f"{doc.get('summary')} Key Mechanism: {doc.get('ecological_mechanisms')}"
             
             citation = ScientificCitation(
