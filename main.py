@@ -187,9 +187,6 @@ else:
 
     @app.get("/", response_class=HTMLResponse)
     @app.get("/index", response_class=HTMLResponse)
-    @app.get("/api", response_class=HTMLResponse)
-    @app.get("/api/index", response_class=HTMLResponse)
-    @app.get("/api/index.py", response_class=HTMLResponse)
     async def serve_index():
         return HTMLResponse(content=INDEX_HTML)
 
@@ -203,16 +200,6 @@ else:
     async def serve_js():
         return Response(content=APP_JS, media_type="application/javascript")
 
-    @app.api_route("/{rest_of_path:path}", methods=["GET", "POST", "PUT", "DELETE"])
-    async def catch_all_debug(request: Request, rest_of_path: str):
-        return JSONResponse({
-            "debug": "catch_all_triggered",
-            "rest_of_path": rest_of_path,
-            "url": str(request.url),
-            "path": request.scope.get("path"),
-            "raw_path": str(request.scope.get("raw_path")),
-            "root_path": request.scope.get("root_path")
-        })
 
 if __name__ == "__main__":
     import uvicorn
