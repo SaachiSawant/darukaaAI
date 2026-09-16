@@ -75,13 +75,19 @@ app.add_middleware(
 # Vercel Serverless Path Normalization Middleware
 @app.middleware("http")
 async def vercel_path_normalizer(request: Request, call_next):
+    from urllib.parse import parse_qs, unquote
+    raw_qs = request.scope.get("query_string", b"")
+    if isinstance(raw_qs, bytes):
+        raw_qs = raw_qs.decode("utf-8", errors="ignore")
+    parsed = parse_qs(raw_qs)
     override_path = (
-        request.query_params.get("path")
+        (parsed.get("path") and parsed["path"][0])
         or request.headers.get("x-matched-path")
         or request.headers.get("x-vercel-matched-path")
         or request.headers.get("x-forwarded-uri")
     )
     if override_path and override_path not in ["/api/index.py", "/api/index", "/api/main.py", "/api/main"]:
+        override_path = unquote(override_path)
         if not override_path.startswith("/"):
             override_path = "/" + override_path
         request.scope["path"] = override_path
@@ -93,6 +99,7 @@ async def vercel_path_normalizer(request: Request, call_next):
                 request.scope["path"] = new_path
                 break
     return await call_next(request)
+
 
 
 
