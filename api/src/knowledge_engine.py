@@ -1,11 +1,17 @@
+from __future__ import annotations
 import json
 import os
 import re
 import math
 from typing import List, Dict, Any, Optional
-from src.models import ScientificCitation
 
-from src.embedded_data import EMBEDDED_KNOWLEDGE_CORPUS
+try:
+    from src.models import ScientificCitation
+    from src.embedded_data import EMBEDDED_KNOWLEDGE_CORPUS
+except ImportError:
+    from api.src.models import ScientificCitation
+    from api.src.embedded_data import EMBEDDED_KNOWLEDGE_CORPUS
+
 
 class HybridKnowledgeEngine:
     """

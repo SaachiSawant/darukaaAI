@@ -1,13 +1,25 @@
+from __future__ import annotations
 import re
 from typing import List, Dict, Any, Tuple, Optional
-from src.models import (
-    StructuredContext,
-    CausalChainNode,
-    ScientificIntervention,
-    MetricImpact,
-    ScientificCitation
-)
-from src.knowledge_engine import HybridKnowledgeEngine
+try:
+    from src.models import (
+        StructuredContext,
+        CausalChainNode,
+        ScientificIntervention,
+        MetricImpact,
+        ScientificCitation
+    )
+    from src.knowledge_engine import HybridKnowledgeEngine
+except ImportError:
+    from api.src.models import (
+        StructuredContext,
+        CausalChainNode,
+        ScientificIntervention,
+        MetricImpact,
+        ScientificCitation
+    )
+    from api.src.knowledge_engine import HybridKnowledgeEngine
+
 
 class MultiMetricCausalEngine:
     """

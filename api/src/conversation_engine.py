@@ -1,3 +1,4 @@
+from __future__ import annotations
 import re
 import os
 import uuid
@@ -8,16 +9,40 @@ from dotenv import load_dotenv
 
 load_dotenv()
 from typing import Dict, List, Any, Optional, Tuple
-from src.models import (
-    ChatRequest,
-    StructuredContext,
-    ClarificationQuestion,
-    EcologicalAnalysisResult,
-    ScientificCitation
-)
-from src.knowledge_engine import HybridKnowledgeEngine
-from src.causal_engine import MultiMetricCausalEngine
-from src.geo_engine import GeoSpatialResolver
+try:
+    from src.models import (
+        ChatRequest,
+        StructuredContext,
+        ClarificationQuestion,
+        MetricImpact,
+        ScientificCitation,
+        CausalChainNode,
+        ScientificIntervention,
+        EcologicalAnalysisResult,
+        GeoCoordinates
+    )
+except ImportError:
+    from api.src.models import (
+        ChatRequest,
+        StructuredContext,
+        ClarificationQuestion,
+        MetricImpact,
+        ScientificCitation,
+        CausalChainNode,
+        ScientificIntervention,
+        EcologicalAnalysisResult,
+        GeoCoordinates
+    )
+
+try:
+    from src.knowledge_engine import HybridKnowledgeEngine
+    from src.causal_engine import MultiMetricCausalEngine
+    from src.geo_engine import GeoSpatialResolver
+except ImportError:
+    from api.src.knowledge_engine import HybridKnowledgeEngine
+    from api.src.causal_engine import MultiMetricCausalEngine
+    from api.src.geo_engine import GeoSpatialResolver
+
 
 class ConversationIntelligenceEngine:
     """
