@@ -9,3 +9,8 @@ for p in [PARENT_DIR, CURRENT_DIR, os.getcwd()]:
         sys.path.insert(0, p)
 
 from main import app
+from mangum import Mangum
+
+# Mangum bridges ASGI (FastAPI) to Vercel/Lambda serverless execution
+handler = Mangum(app, lifespan="off")
+app = handler
