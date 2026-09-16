@@ -194,14 +194,8 @@ async def serve_js():
     content = read_static_file("app.js")
     return Response(content=content, media_type="application/javascript")
 
-# Export for both ASGI and WSGI/Serverless Lambda runners
-try:
-    from mangum import Mangum
-    handler = Mangum(app, lifespan="off")
-except Exception:
-    pass
-
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
 
