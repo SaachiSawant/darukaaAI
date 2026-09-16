@@ -75,13 +75,23 @@ app.add_middleware(
 # Vercel Serverless Path Normalization Middleware
 @app.middleware("http")
 async def vercel_path_normalizer(request: Request, call_next):
-    raw_path = request.scope.get("path", "")
-    for prefix in ["/api/index.py", "/api/index", "/api/main.py", "/api/main"]:
-        if raw_path.startswith(prefix):
-            raw_path = raw_path[len(prefix):] or "/"
-            request.scope["path"] = raw_path
-            break
+    matched_path = (
+        request.headers.get("x-matched-path")
+        or request.headers.get("x-vercel-matched-path")
+        or request.headers.get("x-forwarded-uri")
+        or request.headers.get("x-original-uri")
+    )
+    if matched_path and matched_path not in ["/api/index.py", "/api/index", "/api/main.py", "/api/main"]:
+        request.scope["path"] = matched_path
+    else:
+        raw_path = request.scope.get("path", "")
+        for prefix in ["/api/index.py", "/api/index", "/api/main.py", "/api/main"]:
+            if raw_path.startswith(prefix):
+                new_path = raw_path[len(prefix):] or "/"
+                request.scope["path"] = new_path
+                break
     return await call_next(request)
+
 
 if INIT_ERROR:
     @app.api_route("/{full_path:path}", methods=["GET", "POST", "PUT", "DELETE"])
