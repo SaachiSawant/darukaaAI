@@ -3,8 +3,8 @@ import sys
 import json
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
-API_DIR = os.path.join(CURRENT_DIR, "api")
-for p in [CURRENT_DIR, API_DIR, os.getcwd()]:
+PARENT_DIR = os.path.dirname(CURRENT_DIR)
+for p in [CURRENT_DIR, PARENT_DIR, os.getcwd()]:
     if p and p not in sys.path:
         sys.path.insert(0, p)
 

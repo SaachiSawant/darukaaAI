@@ -8,6 +8,12 @@ for p in [PARENT_DIR, CURRENT_DIR, os.getcwd()]:
     if p and p not in sys.path:
         sys.path.insert(0, p)
 
-# Vercel natively executes ASGI FastAPI applications exported as `app`
-from main import app
+try:
+    from main import app
+except ImportError:
+    try:
+        from api.main import app
+    except ImportError:
+        from .main import app
+
 
