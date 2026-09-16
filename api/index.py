@@ -171,11 +171,18 @@ def read_static_file(filename: str) -> str:
 
 
 @app.get("/", response_class=HTMLResponse)
+@app.get("/index", response_class=HTMLResponse)
+@app.get("/api", response_class=HTMLResponse)
+@app.get("/api/index", response_class=HTMLResponse)
 async def serve_index():
     content = read_static_file("index.html")
     if content:
         return HTMLResponse(content=content)
     return HTMLResponse(content="<h1>Darukaa.Earth AI Biodiversity Intelligence API is running.</h1>")
+
+@app.get("/health")
+async def health_alias():
+    return await health_check()
 
 @app.get("/static/style.css")
 async def serve_css():
@@ -187,6 +194,14 @@ async def serve_js():
     content = read_static_file("app.js")
     return Response(content=content, media_type="application/javascript")
 
+# Export for both ASGI and WSGI/Serverless Lambda runners
+try:
+    from mangum import Mangum
+    handler = Mangum(app, lifespan="off")
+except Exception:
+    pass
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+
